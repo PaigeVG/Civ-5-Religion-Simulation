@@ -27,6 +27,7 @@ class City:
         self.pressures = defaultdict(lambda:0)
         self.reachable_cities = set()
         self.holy_city = holy_city
+        self.main_religion = 'atheist'
         
         self._initialize_atheists(initial_population)
         self._set_main_religion()
@@ -61,8 +62,7 @@ class City:
                     self._flip_a_citizen(religion)
     
     def _set_main_religion(self):
-        #old_religion = self.main_religion
-        
+        old_religion = self.main_religion
         largest_religion = max(self.citizens, key = self.citizens.get)
         
         if self.citizens[largest_religion] > self._total_citizens() / 2:
@@ -70,8 +70,8 @@ class City:
         else:
             self.main_religion = None    
         
-        #if religion_stats[old_religion]['distance'] != religion_stats[self.main_religion]['distance']:
-        #    self._calculate_reachable_cities()
+        if old_religion != self.main_religion:
+            self._update_reachable_cities()
                     
     def _flip_a_citizen(self, religion):
         self.citizens[religion] += 1
@@ -94,7 +94,17 @@ class City:
 
     def _has_no_followers(self, religion):
         return self.citizens[religion] == 0
-
+    
+    def _update_reachable_cities(self, cities):
+        self.reachable_cities = set()
+        if self.main_religion == 'atheist':
+            return None
+        else:
+            for city in cities:
+                distance = hex_distance(self.position, city.position)
+                religion_reach = religion_stats[self.main_religion]['distance']
+                if distance <= religion_reach and city != self:
+                    self.reachable_cities.add(city)
 
 # In[ ]:
 
